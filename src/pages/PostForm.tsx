@@ -20,7 +20,6 @@ export default function PostForm({ onSuccess }: PostFormProps) {
     category: "",
   });
 
-  //Typdeklaration in TS
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const [success, setSuccess] = useState(false);
@@ -39,6 +38,7 @@ export default function PostForm({ onSuccess }: PostFormProps) {
     Culture: "🏛️",
     Nature: "🌲",
   };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -72,11 +72,12 @@ export default function PostForm({ onSuccess }: PostFormProps) {
       });
 
       setTimeout(() => setSuccess(false), 3000);
-      // FÜr Uni-tests pürfen
     } catch (err) {
       const axiosErr = err as AxiosError;
-      const backendMsg = (axiosErr?.response?.data as any)?.msg;
-      const isBadRequest = axiosErr?.response?.status === 400;
+      const resp = axiosErr?.response;
+      const data = resp?.data as any;
+      const backendMsg = data?.msg || data?.message || data?.error;
+      const isBadRequest = resp?.status === 400;
 
       setError(isBadRequest && backendMsg ? backendMsg : "Creation failed.");
     }
@@ -93,8 +94,6 @@ export default function PostForm({ onSuccess }: PostFormProps) {
           Create new post
         </h2>
 
-        {error && <p className="text-[var(--primary)] mb-4">{error}</p>}
-
         <div className="space-y-4">
           <input
             name="author"
@@ -108,6 +107,12 @@ export default function PostForm({ onSuccess }: PostFormProps) {
           <div className="text-sm text-gray-500 mt-1">
             Bitte Vor- und Nachname, beide mit Großbuchstaben
           </div>
+
+          {error && (
+            <p className="text-red-600 text-sm font-semibold" role="alert">
+              {error}
+            </p>
+          )}
 
           <input
             name="title"
