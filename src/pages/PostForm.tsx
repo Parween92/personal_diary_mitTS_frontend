@@ -29,6 +29,7 @@ export default function PostForm({ onSuccess }: PostFormProps) {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
+    if (error) setError(null);
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -71,6 +72,8 @@ export default function PostForm({ onSuccess }: PostFormProps) {
         timerProgressBar: true,
       });
 
+      //für Uni-tests: wenn klappt dann zur Startseite navigieren sonst Fehlermeldung anzeigen
+      navigate("/");
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       const axiosErr = err as AxiosError;
@@ -79,7 +82,11 @@ export default function PostForm({ onSuccess }: PostFormProps) {
       const backendMsg = data?.msg || data?.message || data?.error;
       const isBadRequest = resp?.status === 400;
 
-      setError(isBadRequest && backendMsg ? backendMsg : "Creation failed.");
+      setError(
+        isBadRequest
+          ? backendMsg || "Bitte Vor- und Nachname, beide mit Großbuchstaben."
+          : backendMsg || "Creation failed."
+      );
     }
   };
 
@@ -100,8 +107,9 @@ export default function PostForm({ onSuccess }: PostFormProps) {
             value={formData.author}
             onChange={handleChange}
             placeholder="Autor*in"
-            className="w-full border border-gray-400 px-3 py-2 rounded focus:outline-none focus:ring-2 
-            focus:ring-[var(--primary)]"
+            className={`w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-[var(--primary)] ${
+              error ? "border-red-500" : "border-gray-400"
+            }`}
           />
 
           <div className="text-sm text-gray-500 mt-1">
@@ -193,7 +201,6 @@ export default function PostForm({ onSuccess }: PostFormProps) {
           </div>
 
           <button
-            onClick={() => navigate(-1)}
             type="submit"
             className="flex items-center justify-center gap-2 bg-[var(--primary)] hover:bg-[var(--secondary)]
              px-4 py-2 text-white rounded font-bold transition-colors duration-200 w-full sm:w-auto mt-6"
