@@ -3,6 +3,7 @@ import { createPost } from "../components/AllRequest";
 import { MdSave } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import type { AxiosError } from "axios";
 
 //Type Deklaration in TS
 type PostFormProps = {
@@ -54,27 +55,31 @@ export default function PostForm({ onSuccess }: PostFormProps) {
 
     try {
       const response = await createPost(formData);
-      // Falls response.data alle Felder enthält:
       setFormData((prev) => ({ ...prev, ...response.data }));
 
       setError(null);
       setSuccess(true);
       if (onSuccess) onSuccess();
 
+      Swal.fire({
+        toast: true,
+        position: "center",
+        icon: "success",
+        title: "your Form has been submitten",
+        showConfirmButton: false,
+        timer: 1000,
+        timerProgressBar: true,
+      });
+
       setTimeout(() => setSuccess(false), 3000);
-    } catch (error) {
-      console.error("Error creating:", error);
-      setError("Creation failed.");
+      // FÜr Uni-tests pürfen
+    } catch (err) {
+      const axiosErr = err as AxiosError;
+      const backendMsg = (axiosErr?.response?.data as any)?.msg;
+      const isBadRequest = axiosErr?.response?.status === 400;
+
+      setError(isBadRequest && backendMsg ? backendMsg : "Creation failed.");
     }
-    Swal.fire({
-      toast: true,
-      position: "center",
-      icon: "success",
-      title: "your Form has been submitten",
-      showConfirmButton: false,
-      timer: 1000,
-      timerProgressBar: true,
-    });
   };
 
   return (
@@ -99,6 +104,10 @@ export default function PostForm({ onSuccess }: PostFormProps) {
             className="w-full border border-gray-400 px-3 py-2 rounded focus:outline-none focus:ring-2 
             focus:ring-[var(--primary)]"
           />
+
+          <div className="text-sm text-gray-500 mt-1">
+            Bitte Vor- und Nachname, beide mit Großbuchstaben
+          </div>
 
           <input
             name="title"
