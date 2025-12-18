@@ -53,6 +53,12 @@ export default function PostForm({ onSuccess }: PostFormProps) {
       setError("Please fill in all required fields.");
       return;
     }
+    //für Uni-tests: Titel muss mindestens 3 Zeichen lang sein
+
+    if (formData.title.trim().length < 3) {
+      setError("Titel muss mindestens 3 Zeichen lang sein.");
+      return;
+    }
 
     try {
       const response = await createPost(formData);
@@ -131,6 +137,10 @@ export default function PostForm({ onSuccess }: PostFormProps) {
             className="w-full border border-gray-400 px-3 py-2 rounded focus:outline-none 
             focus:ring-2 focus:ring-[var(--primary)]"
           />
+
+          <div className="text-sm text-gray-500 mt-1">
+            Titel muss mindestens 3 Zeichen lang sein
+          </div>
 
           <textarea
             name="content"
